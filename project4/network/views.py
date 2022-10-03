@@ -3,12 +3,40 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 from .models import User
+from .form import PostForm
 
 
 def index(request):
     return render(request, "network/index.html")
+
+
+@login_required
+def newPost(request):
+
+    # Composing a new post must be via POST
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    # Store the user input in form variable
+    form = PostForm(request.POST)
+
+    # Checks if form is valid, saves new post into DB and redirects the user
+    if form.is_valid():
+        form.instance.creator = request.user
+        form.save()
+        return HttpResponseRedirect(reverse("index"))
+
+    
+
+
+
+
+
 
 
 def login_view(request):

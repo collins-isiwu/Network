@@ -1,5 +1,29 @@
 {% extends "network/layout.html" %}
 
 {% block body %}
-    TODO
+    <div class="container">
+        {% if user.is_authenticated %}
+            <div class="row justify-content-center">
+
+                <div class="col-12 col-lg-8 border mt-0 mt-sm-3 bg-white px-4 box-shadow">
+                    <h3 class="pt-4 pb-3">New Post</h3>
+                    <form action="{% url 'newpost' %}" method="post">
+                        {% csrf_token %}
+                        {{ form }}
+                        <div class="form-group pt-3 text-right">
+                            <button type="submit" class="btn green-button">Post</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-8 mt-3 bg-white border">
+                <h3 class="pt-4 pb-3 text-center">All Posts</h3>
+                {% include "network/posts.html" %}
+            </div>
+        </div>
+    </div>
 {% endblock %}
+    
