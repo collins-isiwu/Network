@@ -1,3 +1,11 @@
 nav {
     background-color: #005b96;
 }
+
+.box-shadow {
+    box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
+}
+
+.box-shadow-posts {
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+}

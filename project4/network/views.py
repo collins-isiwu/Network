@@ -6,13 +6,27 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.core.paginator import Paginator
 
-from .models import User
-from .form import PostForm
+from .models import User, Post, Profile
+from .forms import PostForm 
+from .util import get_next_url, get_previous_url
 
 
 def index(request):
-    return render(request, "network/index.html")
+
+    post = Post.objects.all()
+    paginator = Paginator(post, 8) # Show 8 contacts per page.
+
+    # Gets page number from query string in URL i.e '?page=' and if not, defaults to 1
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)  # the posts returned for each page is stored in page_obj
+    return render(request, "network/index.html", {
+        "form": PostForm(),
+        "page_obj": page_obj,
+        "next_url": get_next_url(page_obj),
+        "previous_url": get_previous_url(page_obj)
+    })
 
 
 @login_required
@@ -32,11 +46,41 @@ def newPost(request):
         return HttpResponseRedirect(reverse("index"))
 
     
+def profile(request, user_id):
+    
+    # looks up the user's profile 
+    profile_user = User.objects.get(pk=user_id)
+
+    # Searches for relevant posts and separate posts into pages of 8
+    profile_posts = Post.objects.filter(creator=user_id)
+    paginator = Paginator(profile_posts, 8)
+
+    # Gets page number from query string in URL '?page=' and if not, defaults to 1
+    page_number = request.GET.get('page', 1)
+    page = paginator.get_page(page_number)  # the posts returned for each page is stored in page
+
+    # filter for users that are following this user
+    if request.user.is_authenticated:
+        following = profile_user.followers.filter(id=request.user.id).exists()
+        print(following)
+    else:
+        following = False
+
+    return render(request, "network/profile.html", {
+        "profile_user": profile_user,
+        "following": following, 
+        "following_count": profile_user.following.all().count(),
+        "followers_count": profile_user.followers.all().count(),
+        "page": page,
+        "previous_url": get_previous_url(page), 
+        "next_url": get_next_url(page)
+    })
 
 
+@login_required(login_url='login')
+def following(request):
 
-
-
+    pass
 
 
 def login_view(request):
