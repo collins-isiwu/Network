@@ -1,3 +1,5 @@
+import pkgutil
+from tkinter import FLAT
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
@@ -16,7 +18,7 @@ from .util import get_next_url, get_previous_url
 def index(request):
 
     post = Post.objects.all()
-    paginator = Paginator(post, 8) # Show 8 contacts per page.
+    paginator = Paginator(post, 10) # Show 10 contacts per page.
 
     # Gets page number from query string in URL i.e '?page=' and if not, defaults to 1
     page_number = request.GET.get('page', 1)
@@ -51,9 +53,9 @@ def profile(request, user_id):
     # looks up the user's profile 
     profile_user = User.objects.get(pk=user_id)
 
-    # Searches for relevant posts and separate posts into pages of 8
+    # Searches for relevant posts and separate posts into pages of 10
     profile_posts = Post.objects.filter(creator=user_id)
-    paginator = Paginator(profile_posts, 8)
+    paginator = Paginator(profile_posts, 10)
 
     # Gets page number from query string in URL '?page=' and if not, defaults to 1
     page_number = request.GET.get('page', 1)
@@ -78,9 +80,53 @@ def profile(request, user_id):
 
 
 @login_required(login_url='login')
-def following(request):
+def unfollow(request, user_to_unfollow):
+    
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
 
-    pass
+    # Removes the user to user's following list. Note that user_to_unfollow is a user_id
+    Profile.objects.get(pk=request.user.id).following.remove(user_to_unfollow)
+    # Reloads 
+    return HttpResponseRedirect(reverse('profile', args=(user_to_unfollow,)))
+
+
+@login_required(login_url='login')
+def follow(request, user_to_follow):
+    
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    # Adds the user to user's following list.
+    Profile.objects.get(pk=request.user.id).following.add(user_to_follow)
+    # Reloads Page
+    return HttpResponseRedirect(reverse('profile', args=(user_to_follow,)))
+
+@login_required(login_url='login')
+def following(request):
+    # Queries to find who the logged in user is following
+    following = Profile.objects.get(pk=request.user.id).following.all()
+
+    # Creates a list of ids, which will be used in the 'following_posts' query
+    following_ids = following.values_list('pk', flat=True)
+    print('following_ids', following_ids)
+
+    # Filters to only show the posts of the users that the logged in user follows
+    following_posts = Post.objects.filter(creator__in=following_ids)
+
+    # Searches for relevant posts and separate posts into pages of 10
+    paginator = Paginator(following_posts, 10)
+
+    # Gets page number from query string in URL '?page=' and if not, defaults to 1
+    page_number = request.GET.get('page', 1)
+    page = paginator.get_page(page_number)  # the posts returned for each page is stored in page
+
+    return render(request, "network/following.html", {
+        "page": page,
+        "posts": following_posts,
+        "next_url": get_next_url(page),
+        "previous_url": get_previous_url(page)
+    })
 
 
 def login_view(request):

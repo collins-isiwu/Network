@@ -1,0 +1,12 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-8 mt-0 mt-sm-3 bg-white">
+                <h3 class="pt-4 pb-3 text-center">Follower's Posts</h3>
+                {% include "network/posts&pagination.html" %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

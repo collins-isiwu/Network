@@ -9,7 +9,7 @@
                 <strong>{{ post.creator }}</strong>
             </a>
             <small class="pl-2 text-black-50">{{ post.timeCreated|naturaltime }}</small>
-            {% if user.is_authenicated and user == post.creator %}
+            {% if user.is_authenticated and user == post.creator %}
             <a href="javascript:void(0)" data-id="{{ post.id }}" id="edit_{{ post.id }}" class="badge badg-secondary ml-1">Edit</a>
             {% endif %}
         </div>
