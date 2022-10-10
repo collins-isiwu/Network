@@ -1,5 +1,5 @@
-import pkgutil
-from tkinter import FLAT
+import json
+from telnetlib import STATUS
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
@@ -10,7 +10,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator
 
-from .models import User, Post, Profile
+from .models import User, Post
 from .forms import PostForm 
 from .util import get_next_url, get_previous_url
 
@@ -86,7 +86,7 @@ def unfollow(request, user_to_unfollow):
         return JsonResponse({"error": "POST request required."}, status=400)
 
     # Removes the user to user's following list. Note that user_to_unfollow is a user_id
-    Profile.objects.get(pk=request.user.id).following.remove(user_to_unfollow)
+    User.objects.get(pk=request.user.id).following.remove(user_to_unfollow)
     # Reloads 
     return HttpResponseRedirect(reverse('profile', args=(user_to_unfollow,)))
 
@@ -98,14 +98,14 @@ def follow(request, user_to_follow):
         return JsonResponse({"error": "POST request required."}, status=400)
 
     # Adds the user to user's following list.
-    Profile.objects.get(pk=request.user.id).following.add(user_to_follow)
+    User.objects.get(pk=request.user.id).following.add(user_to_follow)
     # Reloads Page
     return HttpResponseRedirect(reverse('profile', args=(user_to_follow,)))
 
 @login_required(login_url='login')
 def following(request):
     # Queries to find who the logged in user is following
-    following = Profile.objects.get(pk=request.user.id).following.all()
+    following = User.objects.get(pk=request.user.id) .following.all()
 
     # Creates a list of ids, which will be used in the 'following_posts' query
     following_ids = following.values_list('pk', flat=True)
@@ -127,6 +127,55 @@ def following(request):
         "next_url": get_next_url(page),
         "previous_url": get_previous_url(page)
     })
+
+
+@csrf_exempt
+@login_required(login_url='login')
+def editPost(request, post_id):
+    
+    if request.method != "POST":
+        return JsonResponse({'error': 'POST request required for this action!'}, status=400)
+
+    # Query for requested post
+    try:
+        post = Post.objects.get(pk = post_id)
+    except Post.DoesNotExist:
+        return JsonResponse({'error': 'POST not found'}, status=404)
+
+    # User requesting to edit must be the creator of the post
+    if request.user == post.creator:
+        # 
+        body_unicode = request.body.decode('utf-8')
+        body = json.loads(body_unicode)
+        content = body['content']
+
+        # Updates post with new content
+        Post.objects.filter(pk=post_id).update(content=f'{content}')
+
+        # Return Json Response with content passed back that we can use JS to update
+        return JsonResponse({"message": "Post update was success!", "content": content}, status=200)
+
+    else:
+        return JsonResponse({"error": "You do not have permission to do this"}, status=400)
+
+
+
+@csrf_exempt
+@login_required(login_url='login')
+def updatelike(request, post_id):
+     
+    # saves user and post from the request
+    user = request.user
+
+    # try query for the data sent via fetch
+    try:
+        post = Post.objects.get(pk=post_id)
+    except Post.DoesNotExist:
+        return JsonResponse({"error": "Post not found!"}, status=404)
+
+    # check if user has liked the post before or not
+    if (user.likes.filter(pk=post_id)).exists():
+        pass
 
 
 def login_view(request):

@@ -4,7 +4,7 @@
 <!--Load Posts-->
     {% for post in page_obj.object_list %}
     <div class="border box-shadow-posts p-3 mb-4 mx-0 mx-md-3">
-        <div class="pb-2" id="post_headline{{ post.id }}">
+        <div class="pb-2" id="post_headline_{{ post.id }}">
             <a href="{% url 'profile' post.creator.id %}" class="green-link">
                 <strong>{{ post.creator }}</strong>
             </a>
@@ -38,33 +38,33 @@
     </div>
     {% endfor %}
 
-    {% if page.object_list %}
+    {% if page_obj.object_list %}
         <!--Pagination-->
         <nav aria-label="...">
             <ul class="pagination justify-content-end">
-                <li class="page-item {% if not page.has_previous %} disabled {% endif %}">
-                    <a href="{{ previous_url }}" class="page-link pagination-blue-inactive" tabindex="-1" aria-disabled="true">
-                        <span aria-hidden="true">&laquo;</span>
-                    </a>
+                <li class="page-item {% if not page_obj.has_previous %} disabled {% endif %}">
+                    <a class="page-link pagination-green-inactive" href="{{ previous_url }}" tabindex="-1" aria-disabled="true">Previous</a>
                 </li>
-                {% for num in page.paginator.page_range %}
-                    {% if num == page.number %}
-                        <li class="page-item active" aria-current="page">
-                            <span class="page-link" style="border-color: #005b96; background-color: #005b96;"></span>
-                        {{ num }}
-                        <span class="sr-only">{ current }</span>
-                        </li>
+                <!--Shows the numbers btw pervious and next-->
+                {% for n in page_obj.paginator.page_range %}
 
-                    {% elif num < page.number|add:3 and num > page.number|add:-3 %}
+                    {% if n == page_obj.number %}
+                    <li class="page-item active" aria-current="page">
+                        <span class="page-link" style="border-color: #80A189; background-color: #85A68E;">
+                        {{ n }}
+                        <span class="sr-only">(current)</span>
+                        </span>
+                    </li>
+
+                    {% elif n < page_obj.number|add:3 and n > page_obj.number|add:-3 %}
                     <li class="page-item">
-                        <a href="{{ GET_params.urlencode }}?page={{num}}" class="page-link pagination-blue-inactive">{{ num }}</a>
+                        <a class="page-link pagination-green-inactive" href="{{GET_params.urlencode}}?page={{ n }}">{{ n }}</a>
                     </li>
                     {% endif %}
+
                 {% endfor %}
-                <li class="page-item {% if not page.has_next %} disabled {% endif %}">
-                    <a href="{{ next_url }}" class="page-link pagination-blue-inactive">
-                        <span aria-hidden="true">&raquo;</span>
-                    </a>
+                <li class="page-item {% if not page_obj.has_next %} disabled {% endif %}">
+                    <a class="page-link pagination-green-inactive" href="{{ next_url }}">Next</a>
                 </li>
             </ul>
         </nav>

@@ -4,6 +4,7 @@ from django.db import models
 
 class User(AbstractUser):
     pass
+    following = models.ManyToManyField("self", blank=True, related_name='followers', symmetrical=False)
 
 
 class Post(models.Model):
@@ -25,6 +26,3 @@ class Post(models.Model):
         ordering = ['-timeCreated']
 
 
-    
-class Profile(models.Model):
-    following = models.ManyToManyField(User, blank=True, related_name='followers', symmetrical=False)
