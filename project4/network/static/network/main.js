@@ -23,7 +23,7 @@ function clearEdit(postID) {
 }
 
 
-function updateLikes(id, likes) {
+function updateDOMLikes(id, likes) {
     let likecounter = document.getElementById(`post_likecount_${id}`);
 
     likecounter.innerHTML = likes;
@@ -149,15 +149,15 @@ function contentloaded() {
 
 
 
-        // check if the user clicked a like icon
+        // check if the user clicked the like icon
         if (htmlelement.id.startsWith('post_likeicon_')) {
 
             // Save post ID from data in element
             let id = htmlelement.dataset.id;
 
             // Make fetch request to update page without full reload
-            fetch(`/updateLike/${post_id}`, {
-                method: 'POST'
+            fetch(`/updateLike/${id}`, {
+                method: "POST"
             })
             .then(function(response) {
                 if (response.ok) {
@@ -178,7 +178,7 @@ function contentloaded() {
                 let likeIcon = document.getElementById(`post_likeicon_${id}`);
 
                 // call the updateLikes function to update no of likes on page 
-                updateLikes(id, likes);
+                updateDOMLikes(id, likes);
 
                 // Updates like icon 
                 if (postLikes) {
@@ -186,6 +186,9 @@ function contentloaded() {
                 } else {
                     likeIcon.className = 'likeicon fa-heart far';
                 }
+            })
+            .catch(function(ex) {
+                console.log("failed", ex)
             })
         }
     })

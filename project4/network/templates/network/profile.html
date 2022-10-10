@@ -9,16 +9,16 @@
                 <p class="mb-1"><strong>{{ followers_count }}</strong> Followers </p>
                 <p><strong>{{ following_count }}</strong> Following </p>
 
-                {% if user.is_authenicated and profile_user != request.user %}
+                {% if user.is_authenticated and profile_user != request.user %}
                     {% if not following %}
                         <form action="{% url 'follow' profile_user.id %}" method="post">
                             {% csrf_token %}
-                            <button class="btn blue-button">Follow</button>
+                            <button class="btn btn-primary">Follow</button>
                         </form>
                     {% else %}
                         <form action="{% url 'unfollow' profile_user.id %}" method="post">
                             {% csrf_token %}
-                            <button class="btn blue-button">Unfollow</button>
+                            <button class="btn btn-primary">Unfollow</button>
                         </form>
                     {% endif %}
                 {% endif %}

@@ -24,7 +24,7 @@
 
         <div id="post_likes_{{ post.id }}">
             {% if user.is_authenticated %}
-                <i id="post_likeicon_{{ post.id }}" data-id="{{ post.id }}" class="likeicon likeicon-user fa-heart {% if user in post.likedby.all %}fas{% else %}far{% endif %}"></i>
+                <i id="post_likeicon_{{ post.id }}" data-id="{{ post.id }}" class="likeicon likeicon-user fa-heart {% if user in post.liked_by.all %}fas{% else %}far{% endif %}"></i>
             {% else %}
                 <i class="likeicon fa-heart {% if post.likes != 0 %}fas{% else %}far{% endif %}"></i>
             {% endif %}

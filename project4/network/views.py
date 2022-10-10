@@ -54,8 +54,8 @@ def profile(request, user_id):
     profile_user = User.objects.get(pk=user_id)
 
     # Searches for relevant posts and separate posts into pages of 10
-    profile_posts = Post.objects.filter(creator=user_id)
-    paginator = Paginator(profile_posts, 10)
+    users_posts = Post.objects.filter(creator=user_id)
+    paginator = Paginator(users_posts, 10)
 
     # Gets page number from query string in URL '?page=' and if not, defaults to 1
     page_number = request.GET.get('page', 1)
@@ -64,7 +64,6 @@ def profile(request, user_id):
     # filter for users that are following this user
     if request.user.is_authenticated:
         following = profile_user.followers.filter(id=request.user.id).exists()
-        print(following)
     else:
         following = False
 
@@ -73,7 +72,7 @@ def profile(request, user_id):
         "following": following, 
         "following_count": profile_user.following.all().count(),
         "followers_count": profile_user.followers.all().count(),
-        "page": page,
+        "page_obj": page,
         "previous_url": get_previous_url(page), 
         "next_url": get_next_url(page)
     })
@@ -105,11 +104,10 @@ def follow(request, user_to_follow):
 @login_required(login_url='login')
 def following(request):
     # Queries to find who the logged in user is following
-    following = User.objects.get(pk=request.user.id) .following.all()
+    following = User.objects.get(pk=request.user.id).following.all()
 
     # Creates a list of ids, which will be used in the 'following_posts' query
     following_ids = following.values_list('pk', flat=True)
-    print('following_ids', following_ids)
 
     # Filters to only show the posts of the users that the logged in user follows
     following_posts = Post.objects.filter(creator__in=following_ids)
@@ -122,7 +120,7 @@ def following(request):
     page = paginator.get_page(page_number)  # the posts returned for each page is stored in page
 
     return render(request, "network/following.html", {
-        "page": page,
+        "page_obj": page,
         "posts": following_posts,
         "next_url": get_next_url(page),
         "previous_url": get_previous_url(page)
@@ -162,20 +160,30 @@ def editPost(request, post_id):
 
 @csrf_exempt
 @login_required(login_url='login')
-def updatelike(request, post_id):
+def updateLike(request, post_id):
      
     # saves user and post from the request
     user = request.user
-
-    # try query for the data sent via fetch
+    
+    # try query for the post id (that seeks to be liked) sent via fetch
     try:
         post = Post.objects.get(pk=post_id)
     except Post.DoesNotExist:
         return JsonResponse({"error": "Post not found!"}, status=404)
 
-    # check if user has liked the post before or not
+    # check if user has liked the post before, then unlike it
     if (user.likes.filter(pk=post_id)).exists():
-        pass
+        post.liked_by.remove(user)
+        likes_a_post = False
+    # Else check if the post isn't liked by the user, like it
+    else:
+        post.liked_by.add(user)
+        likes_a_post = True
+
+    # save the updated no of likes in variable likes.
+    likes = post.likes()
+
+    return JsonResponse({"postLikes": likes_a_post, "likesCount": likes}, status=200)
 
 
 def login_view(request):
