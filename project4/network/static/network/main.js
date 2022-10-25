@@ -148,15 +148,14 @@ function contentloaded() {
         }
 
 
-
         // check if the user clicked the like icon
         if (htmlelement.id.startsWith('post_likeicon_')) {
-
+        
             // Save post ID from data in element
             let id = htmlelement.dataset.id;
-
+            
             // Make fetch request to update page without full reload
-            fetch(`/updateLike/${id}`, {
+            fetch(`/updatelike/${id}`, {
                 method: "POST"
             })
             .then(function(response) {
@@ -165,30 +164,29 @@ function contentloaded() {
                 }
                 // if response is an error, reject promise
                 else {
-                    return Promise.reject('There has been an error!')
+                    return Promise.reject('There has been an error.')
                 }
-            })
-            .then(function(data) {
-
-                // saving data from response
-                const postLikes = data.postLikes;
+            }).then(function(data) {
+                
+                // Saving data from response
                 const likes = data.likesCount;
+                const postLikes = data.postLikes;
 
-                // Like icon 
+                // Like icon on page
                 let likeIcon = document.getElementById(`post_likeicon_${id}`);
-
+                
                 // call the updateLikes function to update no of likes on page 
-                updateDOMLikes(id, likes);
+                updateDOMLikes(id, likes)
 
-                // Updates like icon 
+                // Updates like icon correctly according to whether user likes post or not
                 if (postLikes) {
                     likeIcon.className = 'likeicon fa-heart fas';
                 } else {
                     likeIcon.className = 'likeicon fa-heart far';
                 }
-            })
-            .catch(function(ex) {
-                console.log("failed", ex)
+                
+            }).catch(function(ex) {
+                console.log("parsing failed", ex);
             })
         }
     })
