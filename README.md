@@ -10,6 +10,6 @@ A Twitter-like social network website for making posts and following users. User
 ## How to Run
 1. Install git
 2. cd into the directory
-3. Run, git clone https://github.com/collinsavor/Network.git on terminal
+3. Run, git clone https://github.com/collinsavor/Network.git in terminal
 4. Install all the dependencies like Python and Django in your local machine.
 5. Run python manage.py runserver on terminal to start up the application. 
