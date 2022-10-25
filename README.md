@@ -6,3 +6,7 @@ A Twitter-like social network website for making posts and following users. User
 
 ## Project Specifications
 [cs50w - Project 4](https://cs50.harvard.edu/web/2020/projects/4/network/)
+
+## How to Run
+1. Install git
+2. Run git clone
